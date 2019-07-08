@@ -257,7 +257,7 @@ defmodule Postgrex.Protocol do
           | {:error, %DBConnection.TransactionError{}, state}
           | {:disconnect, %RuntimeError{}, state}
           | {:disconnect, %DBConnection.ConnectionError{}, state}
-    def handle_execute(%Query{} = query, params, opts, s) do
+  def handle_execute(%Query{} = query, params, opts, s) do
       IO.puts "[Debug] Postgrex.handle_execute"
       IO.puts ""
     case Keyword.get(opts, :postgrex_copy, false) do
@@ -301,7 +301,7 @@ defmodule Postgrex.Protocol do
 
   defp handle_execute_result(%{ref: ref} = query, params, opts, %{postgres: {_, ref}} = s) do
     IO.puts "[Debug] Postgrex.handle_execute_result 1"
-    IO.inspect "[Debug] query=#{query}"
+    IO.inspect "[Debug] query=#{inspect query}"
     IO.puts ""
     # ref in lock so query is prepared
     status = new_status(opts)
@@ -1249,6 +1249,7 @@ defmodule Postgrex.Protocol do
   end
 
   defp recv_parse(s, status, buffer) do
+    IO.puts "[Debug] Postgrex.Protocol.recv_parse"
     case msg_recv(s, :infinity, buffer) do
       {:ok, msg_parse_complete(), buffer} ->
         {:ok, s, buffer}
@@ -1775,6 +1776,7 @@ defmodule Postgrex.Protocol do
 
   defp recv_bind(s, status, buffer) do
     IO.puts "[Debug] Postgrex.recv_bind"
+    IO.puts "args=#{inspect {s, :infinity, buffer}}"
     result = msg_recv(s, :infinity, buffer)
     IO.puts "[Debug] result_of_msg_recv=#{inspect result}"
     IO.puts ""
