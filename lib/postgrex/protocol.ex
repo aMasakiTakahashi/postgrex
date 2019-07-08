@@ -60,7 +60,8 @@ defmodule Postgrex.Protocol do
           {:ok, state}
           | {:error, Postgrex.Error.t() | %DBConnection.ConnectionError{}}
   def connect(opts) do
-    IO.inspect "[Debug] Postgrex.Protocol.connect"
+    IO.puts "[Debug] Postgrex.Protocol.connect"
+    IO.puts ""
     {host, port} = host_and_port(opts)
 
     timeout = opts[:timeout] || @timeout
@@ -257,7 +258,8 @@ defmodule Postgrex.Protocol do
           | {:disconnect, %RuntimeError{}, state}
           | {:disconnect, %DBConnection.ConnectionError{}, state}
     def handle_execute(%Query{} = query, params, opts, s) do
-      IO.inspect "[Debug] Postgrex.handle_execute"
+      IO.puts "[Debug] Postgrex.handle_execute"
+      IO.puts ""
     case Keyword.get(opts, :postgrex_copy, false) do
       true -> handle_execute_copy(query, params, opts, s)
       false -> handle_execute_result(query, params, opts, s)
@@ -298,8 +300,9 @@ defmodule Postgrex.Protocol do
   end
 
   defp handle_execute_result(%{ref: ref} = query, params, opts, %{postgres: {_, ref}} = s) do
-    IO.inspect "[Debug] Postgrex.handle_execute_result 1"
-    IO.inspect "[Debug] #{query}"
+    IO.puts "[Debug] Postgrex.handle_execute_result 1"
+    IO.inspect "[Debug] query=#{query}"
+    IO.puts ""
     # ref in lock so query is prepared
     status = new_status(opts)
 
@@ -310,12 +313,14 @@ defmodule Postgrex.Protocol do
   end
 
   defp handle_execute_result(%{} = query, _, _, %{postgres: {_, _ref}} = s) do
-    IO.inspect "[Debug] Postgrex.handle_execute_result 2"
+    IO.puts "[Debug] Postgrex.handle_execute_result 2"
+    IO.puts ""
     lock_error(s, :execute, query)
   end
 
   defp handle_execute_result(%{types: types} = query, params, opts, %{types: types} = s) do
-    IO.inspect "[Debug] Postgrex.handle_execute_result 3"
+    IO.puts "[Debug] Postgrex.handle_execute_result 3"
+    IO.puts ""
     if query_member?(s, query) do
       rebind_execute(s, new_status(opts), query, params)
     else
@@ -324,13 +329,15 @@ defmodule Postgrex.Protocol do
   end
 
   defp handle_execute_result(query, _, _, s) do
-    IO.inspect "[Debug] Postgrex.handle_execute_result 4"
+    IO.puts "[Debug] Postgrex.handle_execute_result 4"
+    IO.puts ""
     query_error(s, "query #{inspect(query)} has invalid types for the connection")
   end
 
   defp handle_execute_copy(query, params, opts, s) do
-    IO.inspect "Postgrex.handle_execute_copy"
-    IO.inspect query
+    IO.puts "Postgrex.handle_execute_copy"
+    IO.puts query
+    IO.puts ""
     %{connection_id: connection_id} = s
 
     copy = %Copy{
@@ -1604,7 +1611,8 @@ defmodule Postgrex.Protocol do
   end
 
   defp bind_execute_close(s, %{mode: :transaction} = status, query, params) do
-    IO.inspect "[Debug] Postgrex.bind_execute_close"
+    IO.puts "[Debug] Postgrex.bind_execute_close"
+    IO.puts ""
     %Query{param_formats: pfs, result_formats: rfs, name: name} = query
     %{buffer: buffer} = s
 
@@ -1766,9 +1774,10 @@ defmodule Postgrex.Protocol do
   end
 
   defp recv_bind(s, status, buffer) do
-    IO.inspect "[Debug] Postgrex.recv_bind"
+    IO.puts "[Debug] Postgrex.recv_bind"
     result = msg_recv(s, :infinity, buffer)
-    IO.inspect "[Debug] #{inspect result}"
+    IO.puts "[Debug] result_of_msg_recv=#{inspect result}"
+    IO.puts ""
     case result do
       {:ok, msg_bind_complete(), buffer} ->
         {:ok, s, buffer}
@@ -1786,10 +1795,11 @@ defmodule Postgrex.Protocol do
   end
 
   defp recv_execute(s, status, query, rows \\ [], buffer) do
-    IO.inspect "[Debug] Postgrex.recv_execute"
+    IO.puts "[Debug] Postgrex.recv_execute"
     %Query{result_types: types} = query
     result = rows_recv(s, types, rows, buffer)
-    IO.inspect "[Debug] #{inspect result}"
+    IO.puts "[Debug] result_of_rows_recv=#{inspect result}"
+    IO.puts ""
 
     case result do
       {:ok, msg_command_complete(tag: tag), rows, buffer} ->
@@ -2468,9 +2478,10 @@ defmodule Postgrex.Protocol do
   end
 
   defp recv_close(s, status, buffer) do
-    IO.inspect "[Debug] Postgrex.recv_close"
+    IO.puts "[Debug] Postgrex.recv_close"
     result = msg_recv(s, :infinity, buffer)
-    IO.inspect "[Debug] #{inspect result}"
+    IO.puts "[Debug] result_of_msg_recv=#{inspect result}"
+    IO.puts ""
     case result do
       {:ok, msg_close_complete(), buffer} ->
         {:ok, s, buffer}
@@ -2489,9 +2500,11 @@ defmodule Postgrex.Protocol do
   end
 
   defp recv_ready(%{transactions: :naive} = s, status, buffer) do
-    IO.inspect "[Debug] Postgrex.recv_ready"
+    IO.puts "[Debug] Postgrex.recv_ready"
     result = msg_recv(s, :infinity, buffer)
-    IO.inspect "[Debug] #{inspect result}"
+    IO.puts "[Debug] result_of_msg_recv=#{inspect result}"
+    IO.puts ""
+
     case result do
       {:ok, msg_ready(status: postgres), buffer} ->
         {:ok, %{s | postgres: postgres, buffer: buffer}}
@@ -2760,7 +2773,8 @@ defmodule Postgrex.Protocol do
   end
 
   defp rows_recv(%{types: types} = s, result_types, rows, buffer) do
-    IO.inspect "[Debug] Postgrex.rows_recv types"
+    IO.puts "[Debug] Postgrex.rows_recv types"
+    IO.puts ""
     case Types.decode_rows(buffer, result_types, rows, types) do
       {:ok, rows, buffer} ->
         rows_msg(s, rows, buffer)
@@ -2774,15 +2788,18 @@ defmodule Postgrex.Protocol do
     IO.inspect "[Debug] Postgrex.rows_recv sock"
     case mod.recv(sock, 0, :infinity) do
       {:ok, data} when byte_size(data) < more ->
-        IO.inspect "[Debug] Postgrex.rows_recv sock #{inspect data}"
+        IO.puts "[Debug] Postgrex.rows_recv sock #{inspect data}"
+        IO.puts ""
         rows_recv(s, result_types, rows, [buffer | data], more - byte_size(data))
 
       {:ok, data} when is_binary(buffer) ->
-        IO.inspect "[Debug] Postgrex.rows_recv sock #{inspect data}"
+        IO.puts "[Debug] Postgrex.rows_recv sock #{inspect data}"
+        IO.puts ""
         rows_recv(s, result_types, rows, buffer <> data)
 
       {:ok, data} when is_list(buffer) ->
-        IO.inspect "[Debug] Postgrex.rows_recv sock #{inspect data}"
+        IO.puts "[Debug] Postgrex.rows_recv sock #{inspect data}"
+        IO.puts ""
         rows_recv(s, result_types, rows, IO.iodata_to_binary([buffer | data]))
 
       {:error, reason} ->
@@ -2801,8 +2818,9 @@ defmodule Postgrex.Protocol do
   end
 
   defp msg_send(s, msgs, buffer) when is_list(msgs) do
-    IO.inspect "Postgrex.msg_send"
-    IO.inspect msgs
+    IO.puts "[Debug] Postgrex.msg_send"
+    IO.puts "[Debug] msgs=#{inspect msgs}"
+    IO.puts ""
     binaries = Enum.reduce(msgs, [], &[&2 | maybe_encode_msg(&1)])
     do_send(s, binaries, buffer)
   end
@@ -2853,12 +2871,14 @@ defmodule Postgrex.Protocol do
   end
 
   defp disconnect(s, tag, action, reason, buffer) do
-    IO.inspect "[Debug] Postgrex.Protocol.disconnect 1"
+    IO.puts "[Debug] Postgrex.Protocol.disconnect 1"
+    IO.puts ""
     disconnect(%{s | buffer: buffer}, tag, action, reason)
   end
 
   defp disconnect(s, tag, action, reason) do
-    IO.inspect "[Debug] Postgrex.Protocol.disconnect 2"
+    IO.puts "[Debug] Postgrex.Protocol.disconnect 2"
+    IO.puts ""
     {:disconnect, conn_error(tag, action, reason), s}
   end
 
@@ -2881,7 +2901,8 @@ defmodule Postgrex.Protocol do
   end
 
   defp disconnect(%{connection_id: connection_id} = s, %Postgrex.Error{} = err, buffer) do
-    IO.inspect "[Debug] Postgrex.Protocol.disconnect 3"
+    IO.puts "[Debug] Postgrex.Protocol.disconnect 3"
+    IO.puts ""
     {:disconnect, %{err | connection_id: connection_id}, %{s | buffer: buffer}}
   end
 
