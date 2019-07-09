@@ -450,7 +450,7 @@ defmodule Postgrex do
 
       {:error, :oops} = Postgrex.transaction(pid, fn(conn) ->
         DBConnection.rollback(conn, :bar)
-        IO.puts "never reaches here!"
+        Postgrex.Debug.debug "never reaches here!"
       end)
   """
   @spec rollback(DBConnection.t, reason :: any) :: no_return()
