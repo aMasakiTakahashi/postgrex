@@ -1782,6 +1782,7 @@ defmodule Postgrex.Protocol do
     Postgrex.Debug.debug ""
     case result do
       {:ok, msg_bind_complete(), buffer} ->
+        Postgrex.Debug.debug "[Debug] Postgrex.recv_bind msg_bind_complete"
         {:ok, s, buffer}
 
       {:ok, msg_error(fields: fields), buffer} ->
@@ -1805,6 +1806,7 @@ defmodule Postgrex.Protocol do
 
     case result do
       {:ok, msg_command_complete(tag: tag), rows, buffer} ->
+        Postgrex.Debug.debug "[Debug] Postgrex.recv_execute msg_command_complete"
         {:ok, done(s, status, query, rows, tag), s, buffer}
 
       {:ok, msg_error(fields: fields), _, buffer} ->
@@ -2486,6 +2488,7 @@ defmodule Postgrex.Protocol do
     Postgrex.Debug.debug ""
     case result do
       {:ok, msg_close_complete(), buffer} ->
+        Postgrex.Debug.debug "[Debug] Postgrex.recv_close msg_close_complete"
         {:ok, s, buffer}
 
       {:ok, msg_error(fields: fields), buffer} ->
@@ -2509,6 +2512,7 @@ defmodule Postgrex.Protocol do
 
     case result do
       {:ok, msg_ready(status: postgres), buffer} ->
+        Postgrex.Debug.debug "[Debug] Postgrex.recv_ready msg_ready"
         {:ok, %{s | postgres: postgres, buffer: buffer}}
 
       {:ok, msg_error(fields: fields), buffer} ->
