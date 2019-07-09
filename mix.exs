@@ -1,7 +1,7 @@
 defmodule Postgrex.Mixfile do
   use Mix.Project
 
-  @version "0.14.3"
+  @version "0.14.3-debug.1"
 
   def project do
     [
@@ -33,7 +33,7 @@ defmodule Postgrex.Mixfile do
       {:jason, "~> 1.0", optional: true},
       {:decimal, "~> 1.5"},
 #      {:db_connection, "~> 2.1"},
-      {:db_connection, "2.1.0", [git: "git@github.com:aMasakiTakahashi/db_connection.git", ref: "653c84d03275cade344069568af7d5b6cdd20b9b"]},
+      {:db_connection, "2.1.0-debug.1", [git: "git@github.com:aMasakiTakahashi/db_connection.git", ref: "b4db524faff236d983af7d5fe9b57a4254ebe8be"]},
       {:connection, "~> 1.0"}
     ]
   end
