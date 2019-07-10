@@ -33,7 +33,7 @@ defmodule Postgrex.Mixfile do
       {:jason, "~> 1.0", optional: true},
       {:decimal, "~> 1.5"},
 #      {:db_connection, "~> 2.1"},
-      {:db_connection, "2.1.0", [git: "git@github.com:aMasakiTakahashi/db_connection.git", ref: "653c84d03275cade344069568af7d5b6cdd20b9b"]},
+      {:db_connection, "2.1.0", [git: "git@github.com:aMasakiTakahashi/db_connection.git", ref: "71b31eaa010cbe314331ec59e6826261ade8c959"]},
       {:connection, "~> 1.0"}
     ]
   end
